@@ -1,0 +1,237 @@
+<?php
+/*
+* Đoạn code này tạo hiệu ứng "Xem thêm/Thu gọn" cho nội dung của các phần tử có class
+* ".article-main" (thường là nội dung bài viết) và ".product-content" (thường là mô tả sản phẩm)
+* trên nền tảng Haravan. 
+* Thay các class ".article-main, .product-content" bằng classs bạn muốn sử dụng
+*/
+?>
+<style>
+    /*
+    * Стиль cho hiệu ứng gradient ở phía trên nút "Đọc tiếp" khi nội dung bị ẩn bớt.
+    * Hiệu ứng này tạo cảm giác mờ dần từ trong suốt lên màu trắng để báo hiệu còn nội dung.
+    */
+    .iFitness_readmore_haravan.iFitness_readmore_haravan_more:before{
+        content: ""; /* Bắt buộc để pseudo-element hiển thị */
+        position: absolute; /* Định vị tuyệt đối so với phần tử cha (.iFitness_readmore_haravan_more) */
+        bottom: 100%; /* Đặt ở phía trên cùng của phần tử cha */
+        height: 200px; /* Chiều cao của lớp gradient */
+        left: 0; /* Căn trái */
+        background-image: linear-gradient(180deg,hsla(0,0%,100%,0),#fff); /* Tạo gradient từ trong suốt lên trắng (góc 180 độ) */
+        width: 100%; /* Chiều rộng bằng phần tử cha */
+    }
+
+    /* Стиль cho container chứa hiệu ứng mũi tên động */
+    .arrow_haravan {
+        position: relative; /* Để định vị tuyệt đối các phần tử con (chevron) */
+        display: flex; /* Sử dụng flexbox để căn giữa các mũi tên */
+        justify-content: center; /* Căn giữa theo chiều ngang */
+        align-items: center; /* Căn giữa theo chiều dọc */
+    }
+
+    /* Стиль cho từng mũi tên (chevron) */
+    .chevron_haravan {
+        position: absolute; /* Xếp chồng các mũi tên lên nhau */
+        width: 28px; /* Chiều rộng mũi tên */
+        height: 8px; /* Chiều cao mũi tên */
+        opacity: 0; /* Ban đầu ẩn */
+        transform: scale3d(0.5, 0.5, 0.5); /* Thu nhỏ kích thước ban đầu */
+        animation: move_haravan 3s ease-out infinite; /* Animation di chuyển lên xuống lặp vô hạn */
+        top: -18%; /* Điều chỉnh vị trí ban đầu */
+    }
+
+    /* Стиль cho mũi tên đầu tiên, tạo độ trễ cho animation */
+    .chevron_haravan:first-child {
+        animation: move_haravan 3s ease-out 1s infinite; /* Bắt đầu animation sau 1 giây */
+    }
+
+    /* Стиль cho mũi tên thứ hai, tạo độ trễ khác */
+    .chevron_haravan:nth-child(2) {
+        animation: move_haravan 3s ease-out 2s infinite; /* Bắt đầu animation sau 2 giây */
+    }
+
+    /* Стиль cho phần tử giả ::before và ::after để tạo hình mũi tên */
+    .chevron_haravan:before,
+    .chevron_haravan:after {
+        content: ' '; /* Bắt buộc để pseudo-element hiển thị */
+        position: absolute; /* Định vị tuyệt đối */
+        top: 0;
+        height: 100%;
+        width: 51%;
+        background: #000; /* Màu đen cho mũi tên */
+    }
+
+    /* Стиль cho phần bên trái của mũi tên */
+    .chevron_haravan:before {
+        left: 0;
+        transform: skew(0deg, 30deg); /* Tạo độ nghiêng */
+    }
+
+    /* Стиль cho phần bên phải của mũi tên */
+    .chevron_haravan:after {
+        right: 0;
+        width: 50%;
+        transform: skew(0deg, -30deg); /* Tạo độ nghiêng ngược lại */
+    }
+
+    /* Keyframes cho animation di chuyển lên xuống của mũi tên */
+    @keyframes move_haravan {
+        25% {
+            opacity: 1; /* Hiện mũi tên */
+        }
+        33% {
+            opacity: 1;
+            transform: translateY(30px); /* Di chuyển xuống 30px */
+        }
+        67% {
+            opacity: 1;
+            transform: translateY(40px); /* Tiếp tục di chuyển xuống */
+        }
+        100% {
+            opacity: 0; /* Ẩn mũi tên */
+            transform: translateY(55px) scale3d(0.5, 0.5, 0.5); /* Di chuyển xa hơn và thu nhỏ */
+        }
+    }
+
+    /* Стиль cho chữ "Đọc tiếp" */
+    .text_haravan {
+        display: block; /* Hiển thị như một block */
+        margin-top:55px; /* Tạo khoảng cách phía trên chữ */
+        font-size: 14px;
+        color: #fff; /* Màu trắng */
+        text-transform: uppercase; /* Viết hoa tất cả chữ */
+        white-space: nowrap; /* Ngăn chữ xuống dòng */
+        opacity: .25; /* Độ mờ ban đầu */
+        animation: pulse_haravan 2s linear alternate infinite; /* Animation nhấp nháy */
+    }
+
+    /* Keyframes cho animation nhấp nháy của chữ */
+    @keyframes pulse_haravan {
+        to {
+            opacity: 1; /* Tăng độ mờ lên 1 */
+        }
+    }
+
+    /* Стиль chung cho phần tử chứa nội dung (bài viết hoặc mô tả sản phẩm) */
+    .article-main, .product-content {
+        overflow: hidden; /* Ẩn nội dung vượt quá kích thước */
+        position: relative; /* Để định vị tuyệt đối nút "Đọc tiếp/Thu gọn" */
+        padding-bottom: 25px; /* Tạo khoảng cách dưới cùng */
+    }
+
+    /* Стиль để giới hạn chiều cao ban đầu của nội dung */
+    .fix_height_haravan {
+        max-height: 1500px; /* Chiều cao tối đa trước khi thu gọn */
+        overflow: hidden;
+        position: relative; /* Cần thiết cho các phần tử con định vị tuyệt đối */
+    }
+
+    /* Стиль để thiết lập chiều cao ban đầu cho nội dung khi chưa click "Đọc tiếp" */
+    .article-main:not(.active), .product-content:not(.active) {
+        height: 500!important; /* Chiều cao hiển thị ban đầu */
+    }
+
+    /* Стиль cho container của nút "Đọc tiếp" và "Thu gọn" */
+    .iFitness_readmore_haravan {
+        text-align: center; /* Căn giữa nội dung bên trong */
+        cursor: pointer; /* Hiển thị con trỏ chuột khi hover */
+        position: absolute; /* Đặt ở vị trí tuyệt đối so với phần tử cha */
+        z-index: 10; /* Đảm bảo nút không bị các phần tử khác che phủ */
+        bottom: 0; /* Đặt ở dưới cùng của phần tử cha */
+        width: 100%; /* Chiều rộng bằng phần tử cha */
+        background: #fff; /* Màu nền trắng cho nút */
+    }
+
+    /* Стиль cho hiệu ứng gradient ở phía trên nút "Đọc tiếp" (phiên bản cũ - có thể không dùng đến với hiệu ứng mũi tên) */
+    .iFitness_readmore_haravan:before {
+        height: 55px;
+        margin-top: -45px;
+        content: "";
+        background: -moz-linear-gradient(top, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 100%);
+        background: -webkit-linear-gradient(top, rgba(255,255,255,0) 0%,rgba(255,255,255,1) 100%);
+        background: linear-gradient(to bottom, rgba(255,255,255,0) 0%,rgba(255,255,255,1) 100%);
+        filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff00', endColorstr='#ffffff',GradientType=0 );
+        display: block;
+    }
+
+    /* Стиль cho thẻ link <a> bên trong nút "Đọc tiếp" và "Thu gọn" */
+    .iFitness_readmore_haravan a {
+        color: #318A00; /* Màu chữ xanh lá cây */
+        display: block; /* Chiếm toàn bộ diện tích của phần tử cha */
+        font-size:16px;
+        font-weight:700; /* Chữ đậm */
+    }
+
+    /* Стиль cho mũi tên hướng lên trên của nút "Thu gọn" */
+    .iFitness_readmore_haravan_less a:after {
+        border-top: 0;
+        border-left: 6px solid transparent;
+        border-right: 6px solid transparent;
+        border-bottom: 6px solid #318A00; /* Màu xanh lá cây */
+    }
+
+    /* Ẩn lớp gradient phía trên nút "Thu gọn" (nếu có) */
+    .iFitness_readmore_haravan_less:before {
+        display: none;
+    }
+
+    /* Ẩn nút "Thu gọn" ban đầu */
+    .iFitness_readmore_haravan.iFitness_readmore_haravan_less{display:none;}
+</style>
+
+<script>
+    (function($){
+        $(window).on('load', function(){
+            // Chọn tất cả các phần tử có class .article-main HOẶC .product-content
+            $('.article-main, .product-content').each(function(){
+                let wrap = $(this); // $(this) đại diện cho từng phần tử .article-main hoặc .product-content được tìm thấy
+
+                // Kiểm tra xem phần tử này đã được xử lý hiệu ứng "Xem thêm" hay chưa
+                if (wrap.data('readmore-initialized')) {
+                    return; // Nếu đã xử lý rồi thì bỏ qua phần tử này
+                }
+                wrap.data('readmore-initialized', true); // Đánh dấu là đã xử lý
+
+                let current_height = wrap.height(); // Lấy chiều cao hiện tại của nội dung
+                let your_height = 1500; // Chiều cao ngưỡng để hiển thị nút "Xem thêm"
+
+                // Nếu chiều cao nội dung lớn hơn ngưỡng
+                if(current_height > your_height){
+                    wrap.addClass('fix_height_haravan'); // Thêm class để giới hạn chiều cao hiển thị ban đầu
+
+                    // Thêm nút "Đọc tiếp" vào cuối nội dung
+                    wrap.append(function(){
+                        return '<div class="iFitness_readmore_haravan iFitness_readmore_haravan_more"><span class="arrow_haravan"> <span class="chevron_haravan"></span><span class="chevron_haravan"></span><span class="chevron_haravan"></span><span class="text_haravan"><a class="nutmua" title="Đọc tiếp" href="javascript:void(0);">Đọc tiếp</a></span></span></div>';
+                    });
+
+                    // Thêm nút "Thu gọn" (ẩn ban đầu) vào cuối nội dung
+                    wrap.append(function(){
+                        return '<div class="iFitness_readmore_haravan iFitness_readmore_haravan_less" style="display: none;"><a class="nutmua" title="Thu gọn" href="javascript:void(0);">Thu gọn</a></div>';
+                    });
+
+                    // Bắt sự kiện click vào nút "Đọc tiếp"
+                    $('body').off('click','.iFitness_readmore_haravan_more').on('click','.iFitness_readmore_haravan_more', function(){
+                        // $(this) là nút "Đọc tiếp" vừa được click
+                        $(this).closest('.fix_height_haravan').removeClass('fix_height_haravan'); // Loại bỏ class giới hạn chiều cao để hiển thị toàn bộ nội dung
+                        $(this).hide(); // Ẩn nút "Đọc tiếp"
+                        $(this).siblings('.iFitness_readmore_haravan_less').show(); // Hiển thị nút "Thu gọn" (các phần tử anh em có class .iFitness_readmore_haravan_less)
+                    });
+
+                    // Bắt sự kiện click vào nút "Thu gọn"
+                    $('body').off('click','.iFitness_readmore_haravan_less').on('click','.iFitness_readmore_haravan_less', function(){
+                        // $(this) là nút "Thu gọn" vừa được click
+                        var parentElement = $(this).closest('.article-main, .product-content'); // Tìm phần tử cha có class .article-main hoặc .product-content
+                        parentElement.addClass('fix_height_haravan'); // Thêm lại class giới hạn chiều cao
+                        $(this).hide(); // Ẩn nút "Thu gọn"
+                        $(this).siblings('.iFitness_readmore_haravan_more').show(); // Hiển thị lại nút "Đọc tiếp"
+
+                        // Cuộn lên đầu của phần nội dung (tùy chọn)
+                        $('html, body').animate({
+                            scrollTop: parentElement.offset().top - 100 // offset().top lấy vị trí top của phần tử, trừ 100px để có khoảng cách
+                        }, 500); // Thời gian animation là 500ms
+                    });
+                }
+            });
+        });
+    })(jQuery);
+</script>
